@@ -1,43 +1,27 @@
+// ---- Modulos ----
 const express = require('express');
-const Contenedor = require('./archivos.js')
-const productos =  new Contenedor();
+const morgan = require('morgan');
 
+// ---- Instancia del servidor ----
 const app = express();
+const routerProductos = require('./src/routes/productos.routes');
 
-app.get('/',(request, response) => {
-    response.send('Servidor iniciado Alonso NH - /productos - / productoRandom');
-});
-
-// Response de todos los productos
-app.get('/productos', async (request, response) => {
-    const pro = await productos.getAll();
-    let html = ""
-    for (let i = 0; i < pro.length; i++) {
-        let name = pro[i].tittle;
-        let id = pro[i].id;
-        let price = pro[i].price;
-
-        html +=`<h3>ID PRODUCTO: ${id} // NAME PRODUCTO : ${name} // PRICE : $ ${price}</h3>`
-    }   
-    response.send(html);
-});
+// ---- Middlewares ----
+app.use(express.json());
+app.use(express.urlencoded({extended: true}));
+app.use(morgan('dev'));
+app.use(express.static(__dirname + '/public'));
 
 
-// Response de un producto
-app.get('/productoRandom', async (request, response) => {
-    const pro = await productos.getAll();
+// ---- Rutas ----
+app.use('/api/productos', routerProductos);
 
-        let html = "";
-        const random = parseInt(Math.random()*3+0);
-        let name = pro[random].tittle;
-        let id = pro[random].id;
-        let price = pro[random].price;
 
-    html =`<h3>ID PRODUCTO: ${id} // NAME PRODUCTO : ${name} // PRICE : $ ${price}</h3>`
-
-    response.send(html)
-})
-
-const server = app.listen(8080, ()=> {
+// ---- Servidor ----
+const PORT = 8080;
+const server = app.listen(PORT, ()=> {
     console.log(`Servidor http en http://localhost:8080/`)
+})
+server.on('error', err => {
+    console.error(`Error en el servidor : ${err}`);
 })
